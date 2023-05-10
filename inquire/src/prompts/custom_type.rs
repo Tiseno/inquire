@@ -41,6 +41,7 @@ use crate::{
 ///     placeholder: Some("123.45"),
 ///     error_message: "Please type a valid number.".into(),
 ///     help_message: "Do not use currency and the number should use dots as the decimal separator.".into(),
+///     initial_input: None,
 ///     parser: &|i| match i.parse::<f64>() {
 ///         Ok(val) => Ok(val),
 ///         Err(_) => Err(()),
@@ -80,6 +81,9 @@ pub struct CustomType<'a, T> {
 
     /// Help message to be presented to the user.
     pub help_message: Option<&'a str>,
+
+    /// Initial value of the prompt's text input.
+    pub initial_input: Option<&'a str>,
 
     /// Function that formats the user input and presents it to the user as the final rendering of the prompt.
     pub formatter: CustomTypeFormatter<'a, T>,
@@ -129,6 +133,7 @@ where
             default: None,
             placeholder: None,
             help_message: None,
+            initial_input: None,
             formatter: &|val| val.to_string(),
             default_value_formatter: &|val| val.to_string(),
             parser: &|a| a.parse::<T>().map_err(|_| ()),
@@ -153,6 +158,12 @@ where
     /// Sets the help message of the prompt.
     pub fn with_help_message(mut self, message: &'a str) -> Self {
         self.help_message = Some(message);
+        self
+    }
+
+    /// Sets the predefined text for the prompt
+    pub fn with_initial_input(mut self, initial_input: &'a str) -> Self {
+        self.initial_input = Some(initial_input);
         self
     }
 
@@ -284,6 +295,12 @@ where
     T: Clone,
 {
     fn from(co: CustomType<'a, T>) -> Self {
+        let input = Input::new_with(co.initial_input.unwrap_or_default());
+        let input = if let Some(placeholder) = co.placeholder {
+            input.with_placeholder(placeholder)
+        } else {
+            input
+        };
         Self {
             message: co.message,
             error: None,
@@ -293,10 +310,7 @@ where
             default_value_formatter: co.default_value_formatter,
             validators: co.validators,
             parser: co.parser,
-            input: co
-                .placeholder
-                .map(|p| Input::new().with_placeholder(p))
-                .unwrap_or_else(Input::new),
+            input,
             error_message: co.error_message,
         }
     }

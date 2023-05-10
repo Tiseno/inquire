@@ -64,6 +64,9 @@ pub struct Select<'a, T> {
     /// Help message to be presented to the user.
     pub help_message: Option<&'a str>,
 
+    /// Initial value of the prompt's text input.
+    pub initial_input: Option<&'a str>,
+
     /// Page size of the options displayed to the user.
     pub page_size: usize,
 
@@ -159,6 +162,7 @@ where
             message,
             options,
             help_message: Self::DEFAULT_HELP_MESSAGE,
+            initial_input: None,
             page_size: Self::DEFAULT_PAGE_SIZE,
             vim_mode: Self::DEFAULT_VIM_MODE,
             starting_cursor: Self::DEFAULT_STARTING_CURSOR,
@@ -171,6 +175,12 @@ where
     /// Sets the help message of the prompt.
     pub fn with_help_message(mut self, message: &'a str) -> Self {
         self.help_message = Some(message);
+        self
+    }
+
+    /// Sets the predefined text for the search
+    pub fn with_initial_input(mut self, initial_input: &'a str) -> Self {
+        self.initial_input = Some(initial_input);
         self
     }
 
@@ -302,6 +312,7 @@ where
 
         let string_options = so.options.iter().map(T::to_string).collect();
         let filtered_options = (0..so.options.len()).collect();
+        let input = Input::new_with(so.initial_input.unwrap_or_default());
 
         Ok(Self {
             message: so.message,
@@ -312,7 +323,7 @@ where
             vim_mode: so.vim_mode,
             cursor_index: so.starting_cursor,
             page_size: so.page_size,
-            input: Input::new(),
+            input,
             filter: so.filter,
             formatter: so.formatter,
         })

@@ -99,6 +99,9 @@ pub struct Password<'a> {
     /// Help message to be presented to the user.
     pub help_message: Option<&'a str>,
 
+    /// Initial value of the prompt's text input.
+    pub initial_input: Option<&'a str>,
+
     /// Function that formats the user input and presents it to the user as the final rendering of the prompt.
     pub formatter: StringFormatter<'a>,
 
@@ -159,6 +162,7 @@ impl<'a> Password<'a> {
             enable_display_toggle: Self::DEFAULT_ENABLE_DISPLAY_TOGGLE,
             display_mode: Self::DEFAULT_DISPLAY_MODE,
             help_message: Self::DEFAULT_HELP_MESSAGE,
+            initial_input: None,
             formatter: Self::DEFAULT_FORMATTER,
             validators: Self::DEFAULT_VALIDATORS,
             render_config: get_configuration(),
